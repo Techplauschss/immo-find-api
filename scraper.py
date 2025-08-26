@@ -103,7 +103,31 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, rad
         for item in items:
             try:
                 html = item.get_attribute("outerHTML")
-                # ...Extraktion wie bisher...
+                
+                # Link zur Anzeige extrahieren
+                link = None
+                try:
+                    link_elem = item.find_element(By.CSS_SELECTOR, "article.aditem > a, a.ellipsis")
+                    href = link_elem.get_attribute("href")
+                    if href:
+                        # Relativen Link zu absoluter URL konvertieren
+                        if href.startswith('/'):
+                            link = f"https://www.kleinanzeigen.de{href}"
+                        else:
+                            link = href
+                except:
+                    try:
+                        # Alternative: Schaue nach anderen Link-Elementen
+                        link_elem = item.find_element(By.CSS_SELECTOR, "a[href*='/s-anzeige/']")
+                        href = link_elem.get_attribute("href")
+                        if href:
+                            if href.startswith('/'):
+                                link = f"https://www.kleinanzeigen.de{href}"
+                            else:
+                                link = href
+                    except:
+                        pass
+                
                 price = None
                 try:
                     price_elem = item.find_element(By.CSS_SELECTOR, "p.aditem-main--middle--price-shipping--price, p.aditem-price")
@@ -171,7 +195,8 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, rad
                 listings.append({
                     "price": price,
                     "qm": qm,
-                    "location": location
+                    "location": location,
+                    "link": link
                 })
             except Exception as e:
                 pass
