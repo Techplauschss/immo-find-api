@@ -10,15 +10,36 @@ import time
 BASE_URL = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/c196l3848r20"
 
 
-def fetch_listings(max_price=None):
+def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None):
     import re, random, json
     from selenium.webdriver.common.action_chains import ActionChains
     
-    # URL dynamisch mit max_price erstellen
-    if max_price:
-        base_url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/preis::{max_price}/c196l3848r20"
-    else:
-        base_url = BASE_URL
+    # URL dynamisch mit allen Parametern erstellen
+    base_url = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/"
+    
+    # Preis-Parameter hinzufügen
+    if min_price or max_price:
+        if min_price and max_price:
+            # Preisbereich: min:max
+            base_url += f"preis:{min_price}:{max_price}/"
+        elif min_price:
+            # Nur Mindestpreis: min
+            base_url += f"preis:{min_price}/"
+        elif max_price:
+            # Nur Maximalpreis: :max
+            base_url += f"preis::{max_price}/"
+    
+    base_url += "c196l3848r20"
+    
+    # QM-Parameter hinzufügen (falls angegeben)
+    if min_qm or max_qm:
+        qm_param = ""
+        if min_qm:
+            qm_param += str(min_qm)
+        qm_param += "%2C"
+        if max_qm:
+            qm_param += str(max_qm)
+        base_url += f"+wohnung_kaufen.qm_d:{qm_param}"
     
     options = Options()
     options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -32,10 +53,36 @@ def fetch_listings(max_price=None):
         if page == 1:
             url = base_url
         else:
-            if max_price:
-                url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/preis::{max_price}/seite:{page}/c196l3848r20"
-            else:
-                url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/seite:{page}/c196l3848r20"
+            # URL für weitere Seiten dynamisch erstellen
+            url = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/"
+            
+            # Preis-Parameter hinzufügen
+            if min_price or max_price:
+                if min_price and max_price:
+                    # Preisbereich: min:max
+                    url += f"preis:{min_price}:{max_price}/"
+                elif min_price:
+                    # Nur Mindestpreis: min
+                    url += f"preis:{min_price}/"
+                elif max_price:
+                    # Nur Maximalpreis: :max
+                    url += f"preis::{max_price}/"
+            
+            # Seiten-Parameter hinzufügen
+            url += f"seite:{page}/"
+            
+            # Basis-Kategorie hinzufügen
+            url += "c196l3848r20"
+            
+            # QM-Parameter hinzufügen (falls angegeben)
+            if min_qm or max_qm:
+                qm_param = ""
+                if min_qm:
+                    qm_param += str(min_qm)
+                qm_param += "%2C"
+                if max_qm:
+                    qm_param += str(max_qm)
+                url += f"+wohnung_kaufen.qm_d:{qm_param}"
         
         print(f"Scraping page {page}: {url}")
         driver.get(url)

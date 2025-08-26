@@ -13,8 +13,14 @@ def get_testdaten():
     ]
 
 @app.get("/dresden-listings")
-def get_dresden_listings(response: Response, max_price: int = Query(None, description="Maximaler Preis in Euro")):
-    listings = fetch_listings(max_price=max_price)
+def get_dresden_listings(
+    response: Response, 
+    max_price: int = Query(None, description="Maximaler Preis in Euro"),
+    min_price: int = Query(None, description="Minimaler Preis in Euro"),
+    max_qm: int = Query(None, description="Maximale Quadratmeter"),
+    min_qm: int = Query(None, description="Minimale Quadratmeter")
+):
+    listings = fetch_listings(max_price=max_price, min_price=min_price, max_qm=max_qm, min_qm=min_qm)
     
     # Anzahl der Listings im Response Header hinzufügen
     listings_count = len(listings) if listings else 0
