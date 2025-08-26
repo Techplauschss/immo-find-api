@@ -7,15 +7,19 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
-BASE_URL = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/c196l3848r20"
+# BASE_URL wird jetzt dynamisch in der fetch_listings Funktion erstellt
 
 
-def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None):
+def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, plz=None, radius=None):
     import re, random, json
     from selenium.webdriver.common.action_chains import ActionChains
     
+    # Standard-Werte für PLZ und Radius
+    location_plz = plz if plz else "01159"
+    location_radius = radius if radius else 20
+    
     # URL dynamisch mit allen Parametern erstellen
-    base_url = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/"
+    base_url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/{location_plz}/"
     
     # Preis-Parameter hinzufügen
     if min_price or max_price:
@@ -29,7 +33,7 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None):
             # Nur Maximalpreis: :max
             base_url += f"preis::{max_price}/"
     
-    base_url += "c196l3848r20"
+    base_url += f"c196l3848r{location_radius}"
     
     # QM-Parameter hinzufügen (falls angegeben)
     if min_qm or max_qm:
@@ -54,7 +58,7 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None):
             url = base_url
         else:
             # URL für weitere Seiten dynamisch erstellen
-            url = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/"
+            url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/{location_plz}/"
             
             # Preis-Parameter hinzufügen
             if min_price or max_price:
@@ -72,7 +76,7 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None):
             url += f"seite:{page}/"
             
             # Basis-Kategorie hinzufügen
-            url += "c196l3848r20"
+            url += f"c196l3848r{location_radius}"
             
             # QM-Parameter hinzufügen (falls angegeben)
             if min_qm or max_qm:
