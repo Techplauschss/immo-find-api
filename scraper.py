@@ -11,12 +11,19 @@ BASE_URL = "https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/c196l3848r20"
 
 
 def fetch_listings(max_price=None):
-    import re, random
+    import re, random, json
     from selenium.webdriver.common.action_chains import ActionChains
+    
+    # URL dynamisch mit max_price erstellen
+    if max_price:
+        url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/01159/preis::{max_price}/c196l3848r20"
+    else:
+        url = BASE_URL
+    
     options = Options()
     options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    driver.get(BASE_URL)
+    driver.get(url)
     time.sleep(3)  # wait for page to load
     items = driver.find_elements(By.CSS_SELECTOR, ".aditem")
     listings = []
