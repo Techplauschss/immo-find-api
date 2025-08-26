@@ -10,12 +10,12 @@ import time
 # BASE_URL wird jetzt dynamisch in der fetch_listings Funktion erstellt
 
 
-def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, plz=None, radius=None):
+def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, radius=None):
     import re, random, json
     from selenium.webdriver.common.action_chains import ActionChains
     
-    # Standard-Werte für PLZ und Radius
-    location_plz = plz if plz else "01159"
+    # Feste Standard-Werte für PLZ und Radius
+    location_plz = "01069"  # Feste PLZ
     location_radius = radius if radius else 20
     
     # URL dynamisch mit allen Parametern erstellen
@@ -33,7 +33,7 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, plz
             # Nur Maximalpreis: :max
             base_url += f"preis::{max_price}/"
     
-    base_url += f"c196l3848r{location_radius}"
+    base_url += f"c196l3833r{location_radius}"
     
     # QM-Parameter hinzufügen (falls angegeben)
     if min_qm or max_qm:
@@ -76,7 +76,7 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, plz
             url += f"seite:{page}/"
             
             # Basis-Kategorie hinzufügen
-            url += f"c196l3848r{location_radius}"
+            url += f"c196l3833r{location_radius}"
             
             # QM-Parameter hinzufügen (falls angegeben)
             if min_qm or max_qm:

@@ -6,19 +6,18 @@ Test script to demonstrate the multi-page scraping functionality with all filter
 from scraper import fetch_listings
 
 def test_all_filters_with_location():
-    print("Testing all filters with custom location...")
+    print("Testing all filters with fixed location...")
     print("=" * 50)
     
-    # Test mit allen Filtern inklusive Ort
+    # Test mit allen Filtern mit fester Location
     min_price = 80000
     max_price = 150000
     min_qm = 40
     max_qm = 70
-    plz = "01099"
     radius = 10
     
     print(f"Fetching listings with:")
-    print(f"  Location: PLZ {plz}, Radius {radius}km")
+    print(f"  Location: PLZ 01159 (fixed), Radius {radius}km")
     print(f"  Price range: {min_price}€ - {max_price}€")
     print(f"  QM range: {min_qm}m² - {max_qm}m²")
     
@@ -27,7 +26,6 @@ def test_all_filters_with_location():
         max_price=max_price, 
         min_qm=min_qm, 
         max_qm=max_qm,
-        plz=plz,
         radius=radius
     )
     
@@ -56,34 +54,31 @@ def test_default_location():
     return listings
 
 def test_location_only():
-    print("\nTesting location filter only...")
+    print("\nTesting radius filter only...")
     print("=" * 30)
     
-    plz = "01069"
     radius = 5
-    print(f"Fetching listings for PLZ {plz} with radius {radius}km (no other filters)")
+    print(f"Fetching listings with radius {radius}km (fixed PLZ 01159, no other filters)")
     
-    listings = fetch_listings(plz=plz, radius=radius)
+    listings = fetch_listings(radius=radius)
     
     print(f"Total listings scraped: {len(listings)}")
     return listings
 
 def test_price_range_with_location():
-    print("\nTesting price range with custom location...")
+    print("\nTesting price range with fixed location...")
     print("=" * 40)
     
     min_price = 100000
     max_price = 120000
-    plz = "01159"
     radius = 20
     print(f"Fetching listings:")
-    print(f"  Location: PLZ {plz}, Radius {radius}km")
+    print(f"  Location: PLZ 01159 (fixed), Radius {radius}km")
     print(f"  Price range: {min_price}€ - {max_price}€")
     
     listings = fetch_listings(
         min_price=min_price, 
         max_price=max_price, 
-        plz=plz, 
         radius=radius
     )
     
