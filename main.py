@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, Response
 from scraper import fetch_listings
 
 app = FastAPI()
@@ -12,13 +12,16 @@ def get_testdaten():
         {"id": 3, "name": "Immobilie C", "preis": 200000}
     ]
 
-
-
-from fastapi import Query
-
 @app.get("/dresden-listings")
-def get_dresden_listings(max_price: int = Query(None, description="Maximaler Preis in Euro")):
+def get_dresden_listings(response: Response, max_price: int = Query(None, description="Maximaler Preis in Euro")):
     listings = fetch_listings(max_price=max_price)
+    
+    # Anzahl der Listings im Response Header hinzufügen
+    listings_count = len(listings) if listings else 0
+    response.headers["X-Total-Listings"] = str(listings_count)
+    response.headers["X-Scraped-Count"] = str(listings_count)
+    
     if not listings:
-        return {"message": "Keine Daten gefunden oder Bot-Schutz aktiv."}
-    return listings
+        return {"message": "Keine Daten gefunden oder Bot-Schutz aktiv.", "count": 0}
+    
+    return {"listings": listings, "count": listings_count}
