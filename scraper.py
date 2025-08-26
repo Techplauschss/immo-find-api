@@ -10,6 +10,58 @@ import time
 # BASE_URL wird jetzt dynamisch in der fetch_listings Funktion erstellt
 
 
+def extract_best_price(item, html):
+    """Extrahiert den besten Preis (höchster Wert) aus einer Anzeige"""
+    price = None
+    try:
+        price_elem = item.find_element(By.CSS_SELECTOR, "p.aditem-main--middle--price-shipping--price, p.aditem-price")
+        price = price_elem.text.strip()
+        euro_idx = price.find('€')
+        if euro_idx != -1:
+            price = price[:euro_idx+1]
+    except:
+        pass
+    
+    if not price:
+        try:
+            script_elems = item.find_elements(By.CSS_SELECTOR, "script[type='application/ld+json']")
+            for script in script_elems:
+                import json
+                data = json.loads(script.get_attribute("innerHTML"))
+                if "price" in data:
+                    price = str(data["price"]).strip()
+                elif "description" in data:
+                    import re
+                    price_match = re.search(r"([\d\.,]+\s*€)", data["description"])
+                    if price_match:
+                        price = price_match.group(1).strip()
+        except:
+            pass
+    
+    if not price:
+        import re
+        # Alle Preise im HTML finden und den höchsten wählen (Kaufpreis vs Miete)
+        price_matches = re.findall(r"([\d\.,]+)\s*€", html)
+        if price_matches:
+            # Preise in Zahlen umwandeln und den höchsten wählen
+            max_price = 0
+            best_price = None
+            for match in price_matches:
+                try:
+                    # Punkte als Tausendertrennzeichen und Kommas als Dezimaltrennzeichen behandeln
+                    clean_price = match.replace('.', '').replace(',', '.')
+                    num_price = float(clean_price)
+                    if num_price > max_price:
+                        max_price = num_price
+                        best_price = match + "€"
+                except:
+                    pass
+            if best_price:
+                price = best_price
+    
+    return price
+
+
 def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, radius=None):
     import re, random, json
     from selenium.webdriver.common.action_chains import ActionChains
@@ -128,32 +180,8 @@ def fetch_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, rad
                     except:
                         pass
                 
-                price = None
-                try:
-                    price_elem = item.find_element(By.CSS_SELECTOR, "p.aditem-main--middle--price-shipping--price, p.aditem-price")
-                    price = price_elem.text.strip()
-                    euro_idx = price.find('€')
-                    if euro_idx != -1:
-                        price = price[:euro_idx+1]
-                except:
-                    pass
-                if not price:
-                    try:
-                        script_elems = item.find_elements(By.CSS_SELECTOR, "script[type='application/ld+json']")
-                        for script in script_elems:
-                            data = json.loads(script.get_attribute("innerHTML"))
-                            if "price" in data:
-                                price = str(data["price"]).strip()
-                            elif "description" in data:
-                                price_match = re.search(r"([\d\.,]+\s*€)", data["description"])
-                                if price_match:
-                                    price = price_match.group(1).strip()
-                    except:
-                        pass
-                if not price:
-                    price_match = re.search(r"([\d\.,]+\s*€)", html)
-                    if price_match:
-                        price = price_match.group(1).strip()
+                # Preis extrahieren mit verbesserter Logik
+                price = extract_best_price(item, html)
 
                 qm = None
                 try:
@@ -361,32 +389,8 @@ def fetch_leipzig_listings(max_price=None, min_price=None, max_qm=None, min_qm=N
                     except:
                         pass
                 
-                price = None
-                try:
-                    price_elem = item.find_element(By.CSS_SELECTOR, "p.aditem-main--middle--price-shipping--price, p.aditem-price")
-                    price = price_elem.text.strip()
-                    euro_idx = price.find('€')
-                    if euro_idx != -1:
-                        price = price[:euro_idx+1]
-                except:
-                    pass
-                if not price:
-                    try:
-                        script_elems = item.find_elements(By.CSS_SELECTOR, "script[type='application/ld+json']")
-                        for script in script_elems:
-                            data = json.loads(script.get_attribute("innerHTML"))
-                            if "price" in data:
-                                price = str(data["price"]).strip()
-                            elif "description" in data:
-                                price_match = re.search(r"([\d\.,]+\s*€)", data["description"])
-                                if price_match:
-                                    price = price_match.group(1).strip()
-                    except:
-                        pass
-                if not price:
-                    price_match = re.search(r"([\d\.,]+\s*€)", html)
-                    if price_match:
-                        price = price_match.group(1).strip()
+                # Preis extrahieren mit verbesserter Logik
+                price = extract_best_price(item, html)
 
                 qm = None
                 try:
