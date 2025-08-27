@@ -1,0 +1,13 @@
+{
+  "name": "immo-find-api",
+  "version": "1.0.0",
+  "description": "Immobilien Scraping API",
+  "main": "main.py",
+  "scripts": {
+    "start": "uvicorn main:app --host=0.0.0.0 --port=$PORT"
+  },
+  "dependencies": {},
+  "engines": {
+    "python": "3.9.x"
+  }
+}
