@@ -1,8 +1,18 @@
 
 from fastapi import FastAPI, Query, Response
+from fastapi.middleware.cors import CORSMiddleware
 from scraper_new import fetch_listings, fetch_leipzig_listings
 
 app = FastAPI()
+
+# CORS Middleware hinzufügen
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In Produktion sollten Sie dies auf Ihre Frontend-Domain einschränken
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/testdaten")
 def get_testdaten():
