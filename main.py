@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI, Query, Response
-from scraper import fetch_listings, fetch_leipzig_listings
+from scraper_new import fetch_listings, fetch_leipzig_listings
 
 app = FastAPI()
 
