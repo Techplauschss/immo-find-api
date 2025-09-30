@@ -295,3 +295,69 @@ def fetch_leipzig_listings(max_price=None, min_price=None, max_qm=None, min_qm=N
     
     print(f"Total Leipzig listings found: {len(all_listings)}")
     return all_listings
+
+
+def fetch_senftenberg_listings(max_price=None, min_price=None, max_qm=None, min_qm=None, radius=None):
+    """Senftenberg-spezifische Version der Hauptfunktion"""
+    location_area = "senftenberg"
+    location_code = "l7838"
+    location_radius = radius if radius else 20
+    
+    # URL aufbauen
+    base_url = f"https://www.kleinanzeigen.de/s-wohnung-kaufen/{location_area}/"
+    
+    # Preis-Parameter
+    if min_price or max_price:
+        if min_price and max_price:
+            base_url += f"preis:{min_price}:{max_price}/"
+        elif min_price:
+            base_url += f"preis:{min_price}/"
+        elif max_price:
+            base_url += f"preis::{max_price}/"
+    
+    base_url += f"c196{location_code}r{location_radius}"
+    
+    # QM-Parameter
+    if min_qm or max_qm:
+        qm_param = ""
+        if min_qm:
+            qm_param += str(min_qm)
+        qm_param += "%2C"
+        if max_qm:
+            qm_param += str(max_qm)
+        base_url += f"+wohnung_kaufen.qm_d:{qm_param}"
+    
+    all_listings = []
+    page = 1
+    
+    # Session für wiederverwendbare Verbindung
+    with requests.Session() as session:
+        while True:
+            # URL für aktuelle Seite
+            url = base_url if page == 1 else f"{base_url}/seite:{page}/"
+            
+            print(f"Scraping Senftenberg page {page}: {url}")
+            listings, has_next = scrape_listings(url, session)
+            
+            if not listings:
+                print(f"No items found on Senftenberg page {page}, stopping.")
+                break
+            
+            print(f"Found {len(listings)} listings on Senftenberg page {page}")
+            all_listings.extend(listings)
+            
+            if not has_next:
+                print(f"No next page found after Senftenberg page {page}, stopping.")
+                break
+            
+            page += 1
+            
+            if page > 10:
+                print("Reached maximum page limit (10), stopping.")
+                break
+            
+            # Kurze Pause zwischen den Anfragen
+            time.sleep(random.uniform(1, 3))
+    
+    print(f"Total Senftenberg listings found: {len(all_listings)}")
+    return all_listings

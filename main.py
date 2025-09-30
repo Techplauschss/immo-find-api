@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
-from scraper_new import fetch_listings, fetch_leipzig_listings
+from scraper_new import fetch_listings, fetch_leipzig_listings, fetch_senftenberg_listings
 
 app = FastAPI()
 
@@ -60,6 +60,34 @@ def get_leipzig_listings(
     radius: int = Query(None, description="Suchradius in km (Standard: 20)")
 ):
     listings = fetch_leipzig_listings(
+        max_price=max_price, 
+        min_price=min_price, 
+        max_qm=max_qm, 
+        min_qm=min_qm,
+        radius=radius
+    )
+    
+    # Anzahl der Listings im Response Header hinzufügen
+    listings_count = len(listings) if listings else 0
+    response.headers["X-Total-Listings"] = str(listings_count)
+    response.headers["X-Scraped-Count"] = str(listings_count)
+    
+    if not listings:
+        return {"message": "Keine Daten gefunden oder Bot-Schutz aktiv.", "count": 0}
+    
+    return {"listings": listings, "count": listings_count}
+
+
+@app.get("/senftenberg-listings")
+def get_senftenberg_listings(
+    response: Response, 
+    max_price: int = Query(None, description="Maximaler Preis in Euro"),
+    min_price: int = Query(None, description="Minimaler Preis in Euro"),
+    max_qm: int = Query(None, description="Maximale Quadratmeter"),
+    min_qm: int = Query(None, description="Minimale Quadratmeter"),
+    radius: int = Query(None, description="Suchradius in km (Standard: 20)")
+):
+    listings = fetch_senftenberg_listings(
         max_price=max_price, 
         min_price=min_price, 
         max_qm=max_qm, 
